@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { supabase } from './supabaseClient';
+import { supabase } from '../pages/api/lib/supabaseClient';
 
 export function useIsAdmin() {
   const { user } = useUser();
