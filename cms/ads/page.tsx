@@ -5,7 +5,7 @@
 import { useEffect, useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '@/pages/api/lib/supabaseClient';
 import { useIsAdmin } from '@/lib/useIsAdmin';
 
 export default function AdsPage() {
