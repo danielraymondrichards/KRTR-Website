@@ -62,9 +62,9 @@ Integrate the following third-party services to make the CMS fully functional.
   ```bash
   npm install cloudinary
   ```
-- [ ] Implement upload component or allow direct URL input
-- [ ] Store image URL in Supabase `image_url`
-- [ ] Show previews in CMS and front-end as needed
+- [X] Implement upload component or allow direct URL input
+- [X] Store image URL in Supabase `image_url`
+- [X] Show previews in CMS and front-end as needed
 
 ---
 
