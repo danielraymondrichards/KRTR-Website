@@ -7,7 +7,8 @@ import { SignedIn, SignedOut, SignInButton } from '@clerk/nextjs';
 import { supabase } from '@/pages/api/lib/supabaseClient';
 
 export default function StoryAssignment() {
-  const isAdmin = useIsAdmin();
+  const { isAdmin, checking } = useIsAdmin();
+
 
   const [heroId, setHeroId] = useState('');
   const [topIds, setTopIds] = useState(['', '', '', '']);
