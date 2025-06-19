@@ -1,32 +1,38 @@
-'use client';
-
+// lib/useIsAdmin.ts
 import { useEffect, useState } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { supabase } from '../pages/api/lib/supabaseClient';
+import { supabase } from './supabaseClient';
 
 export function useIsAdmin() {
   const { user } = useUser();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [checking, setChecking] = useState(true);
 
   useEffect(() => {
     const checkAdmin = async () => {
-      if (!user) return setIsAdmin(false);
+      if (!user) {
+        setChecking(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('users')
         .select('is_admin')
-        .eq('id', user.id)
+        .eq('clerk_id', user.id)
         .single();
 
       if (error) {
-        console.error('Admin check error:', error);
+        console.error(error);
         setIsAdmin(false);
       } else {
-        setIsAdmin(data.is_admin);
+        setIsAdmin(data?.is_admin || false);
       }
+
+      setChecking(false);
     };
 
     checkAdmin();
   }, [user]);
 
-  return isAdmin;
+  return { isAdmin, checking };
 }
