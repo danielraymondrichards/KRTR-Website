@@ -26,7 +26,7 @@ export default function HomePage() {
 
         <section className="col-span-3 bg-yellow-200">TS Banner Ad</section>
 
-        <aside className="min-h-[50px] bg-gray-300 p-4">LS Sidebar</aside>
+        <aside className="min-h-[250px] bg-gray-300 p-4">LS Sidebar</aside>
 
         <section className="col-span-2 bg-white p-4 shadow">Story Item 1</section>
         <section className="col-span-2 bg-white p-4 shadow">Story Item 2</section>
