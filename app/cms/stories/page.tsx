@@ -43,7 +43,7 @@ export default function StoryList() {
               <div className="font-semibold">{story.title}</div>
               <div className="text-sm text-gray-600">By {story.author}</div>
             </div>
-            <Link href={`/cms/stories/${story.id}/edit`} className="text-blue-600 hover:underline">
+            <Link href={`/cms/stories/edit`} className="text-blue-600 hover:underline">
               Edit
             </Link>
           </li>
