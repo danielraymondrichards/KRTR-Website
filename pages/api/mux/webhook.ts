@@ -11,13 +11,15 @@ export const config = {
 };
 
 const buffer = async (readable: ReadableStream<Uint8Array> | null) => {
-  const chunks = [];
+  const chunks: Uint8Array[] = [];
   if (!readable) return Buffer.from([]);
-  for await (const chunk of readable as any) {
+  const reader = (readable as any)[Symbol.asyncIterator]();
+  for await (const chunk of reader) {
     chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
   }
   return Buffer.concat(chunks);
 };
+
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).end();
