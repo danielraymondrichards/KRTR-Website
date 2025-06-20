@@ -1,4 +1,4 @@
-// cms/layout.tsx
+'use client';
 import { ClerkProvider, useUser } from '@clerk/nextjs';
 import { dark } from '@clerk/themes';
 import { useEffect } from 'react';
