@@ -1,9 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import Mux from '@mux/mux-node';
+import { Webhook } from '@mux/mux-node';
 import { supabase } from '../../../lib/supabaseClient';
 
 const muxWebhookSecret = process.env.MUX_WEBHOOK_SECRET!;
-const mux = new Mux();
 
 export const config = {
   api: {
@@ -11,7 +10,6 @@ export const config = {
   },
 };
 
-// Helper to read the raw body for signature verification
 const readRawBody = async (readable: ReadableStream | null): Promise<Buffer> => {
   const chunks: Buffer[] = [];
   if (!readable) return Buffer.from([]);
@@ -31,7 +29,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   let event;
   try {
-    event = new mux.Webhook().verifyHeader(rawBody.toString(), sig, muxWebhookSecret);
+    event = Webhook.verifyHeader(rawBody.toString(), sig, muxWebhookSecret);
   } catch (err) {
     console.error('Webhook verification failed:', err);
     return res.status(400).json({ error: 'Invalid signature' });
@@ -42,7 +40,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const assetId = event.data.id;
 
     if (playbackId && assetId) {
-      // Optional: update story row where mux_asset_id matches
       await supabase
         .from('stories')
         .update({ mux_playback_id: playbackId })
