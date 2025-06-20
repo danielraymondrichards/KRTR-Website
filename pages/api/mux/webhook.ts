@@ -24,7 +24,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const rawBody = await readRawBody(req);
   const sig = req.headers['mux-signature'] as string;
 
-  const webhooks = new Webhooks({ secret: muxWebhookSecret });
+  const webhooks = Webhooks;
 
   let event;
   try {
