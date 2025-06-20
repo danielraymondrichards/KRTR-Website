@@ -12,12 +12,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const upload = await mux.video.uploads.create({
-  new_asset_settings: {
-    playback_policy: ['public'],
-  },
-  playback_policy: ['public'],
-});
+  const upload = await mux.video.uploads.create({
+    new_asset_settings: {
+      playback_policy: ['public'],
+    },
+    cors_origin: ''
+  });
+
 
 
     res.status(200).json({ upload });
