@@ -4,6 +4,7 @@ import { useUser, SignOutButton } from '@clerk/nextjs';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
+import { SignIn } from '@clerk/nextjs';
 
 export default function CmsDashboard() {
   const { isLoaded, isSignedIn, user } = useUser();
@@ -61,7 +62,7 @@ export default function CmsDashboard() {
   }, []);
 
   if (!isLoaded) return <div className="p-6 text-lg">Loading...</div>;
-  import { SignIn } from '@clerk/nextjs';
+  
 
 if (!isSignedIn) {
   return (
