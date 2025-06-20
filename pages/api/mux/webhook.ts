@@ -1,7 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { Webhook } from '@mux/mux-node';
+import Mux from '@mux/mux-node';
 import { supabase } from '../../../lib/supabaseClient';
 
+const mux = new Mux(); // No API keys needed for webhook validation
 const muxWebhookSecret = process.env.MUX_WEBHOOK_SECRET!;
 
 export const config = {
@@ -20,16 +21,14 @@ const readRawBody = async (readable: ReadableStream | null): Promise<Buffer> => 
 };
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'POST') {
-    return res.status(405).end('Method Not Allowed');
-  }
+  if (req.method !== 'POST') return res.status(405).end('Method Not Allowed');
 
   const rawBody = await readRawBody(req.body as any);
   const sig = req.headers['mux-signature'] as string;
 
   let event;
   try {
-    event = Webhook.verifyHeader(rawBody.toString(), sig, muxWebhookSecret);
+    event = mux.webhooks.verifyHeader(rawBody.toString(), sig, muxWebhookSecret);
   } catch (err) {
     console.error('Webhook verification failed:', err);
     return res.status(400).json({ error: 'Invalid signature' });
