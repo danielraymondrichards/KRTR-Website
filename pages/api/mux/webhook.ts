@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { Webhooks } from '@mux/mux-node';
+import Webhooks from '@mux/mux-node';
 import { supabase } from '../../../lib/supabaseClient';
 
 const muxWebhookSecret = process.env.MUX_WEBHOOK_SECRET!;
