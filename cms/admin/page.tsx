@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useIsAdmin } from '@/lib/useIsAdmin';
 import { SignedIn, SignedOut, SignInButton } from '@clerk/nextjs';
-import { supabase } from '@/pages/api/lib/supabaseClient';
+import { supabase } from '@/lib/supabaseClient';
 
 export default function AdminPanel() {
   const isAdmin = useIsAdmin();

@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import { useIsAdmin } from '@/lib/useIsAdmin';
 import { SignedIn, SignedOut, SignInButton } from '@clerk/nextjs';
-import { supabase } from '@/pages/api/lib/supabaseClient';
+import { supabase } from '@/lib/supabaseClient';
 
 export default function StoryAssignment() {
   const { isAdmin, checking } = useIsAdmin();
