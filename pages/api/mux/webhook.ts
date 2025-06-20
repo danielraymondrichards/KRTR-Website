@@ -10,39 +10,38 @@ export const config = {
   },
 };
 
-const readRawBody = async (readable: any): Promise<Buffer> => {
+const readRawBody = async (req: NextApiRequest): Promise<Buffer> => {
   const chunks: Uint8Array[] = [];
-  for await (const chunk of readable) {
+  const readable = req.body as unknown as ReadableStream<Uint8Array> | null;
+  if (!readable) return Buffer.from([]);
+
+  for await (const chunk of readable as any) {
     chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
   }
+
   return Buffer.concat(chunks);
 };
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'POST') return res.status(405).end('Method Not Allowed');
-
-  const rawBody = await readRawBody(req);
   const sig = req.headers['mux-signature'] as string;
-
-  const webhooks = Webhooks;
+  const rawBody = await readRawBody(req);
 
   let event;
   try {
-    event = webhooks.constructEvent(rawBody.toString(), sig);
+    event = Webhooks.verifyHeader(rawBody.toString(), sig, muxWebhookSecret);
   } catch (err) {
     console.error('Webhook verification failed:', err);
     return res.status(400).json({ error: 'Invalid signature' });
   }
 
   if (event.type === 'video.asset.ready') {
-    const playbackId = event.data.playback_ids?.[0]?.id;
-    const assetId = event.data.id;
+    const { id: assetId, playback_ids, passthrough } = event.data;
 
-    if (playbackId && assetId) {
+    if (passthrough) {
       await supabase
         .from('stories')
-        .update({ mux_playback_id: playbackId })
-        .eq('mux_asset_id', assetId);
+        .update({ muxPlaybackId: playback_ids?.[0]?.id })
+        .eq('id', passthrough);
     }
   }
 
