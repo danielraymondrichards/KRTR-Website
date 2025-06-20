@@ -5,6 +5,8 @@ import { useIsAdmin } from '@/lib/useIsAdmin';
 import { SignedIn, SignedOut, SignInButton } from '@clerk/nextjs';
 import { supabase } from '@/lib/supabaseClient';
 
+export const dynamic = 'force-dynamic';
+
 export default function AdminPanel() {
   const isAdmin = useIsAdmin();
   const [users, setUsers] = useState<any[]>([]);
