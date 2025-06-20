@@ -3,7 +3,7 @@ import { ClerkProvider, useUser } from '@clerk/nextjs';
 import { dark } from '@clerk/themes';
 import { useEffect } from 'react';
 import { syncUser } from '@/lib/syncUserToSupabase';
-import '../../cms.css';
+import '../styles/cms.css';
 
 
 
