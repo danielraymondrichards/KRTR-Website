@@ -1,6 +1,7 @@
 // cms/layout.tsx
-import { ClerkProvider } from '@clerk/nextjs';
+import { ClerkProvider, useUser } from '@clerk/nextjs';
 import { dark } from '@clerk/themes';
+import { useEffect } from 'react';
 import { syncUser } from '@/lib/syncUserToSupabase';
 import './cms.css';
 
@@ -10,7 +11,14 @@ export const metadata = {
 };
 
 export default function CmsLayout({ children }: { children: React.ReactNode }) {
-  syncUser(); // Sync Clerk user to Supabase
+  const { user } = useUser();
+
+  useEffect(() => {
+    if (user?.id && user?.primaryEmailAddress?.emailAddress) {
+      syncUser(user.id, user.primaryEmailAddress.emailAddress);
+    }
+  }, [user]);
+
   return (
     <ClerkProvider appearance={{ baseTheme: dark }}>
       <html lang="en">
@@ -19,3 +27,4 @@ export default function CmsLayout({ children }: { children: React.ReactNode }) {
     </ClerkProvider>
   );
 }
+
