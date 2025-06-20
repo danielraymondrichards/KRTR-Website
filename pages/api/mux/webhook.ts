@@ -1,49 +1,41 @@
+// pages/api/mux/webhook.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
-import Webhooks from '@mux/mux-node';
+import Mux from '@mux/mux-node';
 import { supabase } from '../../../lib/supabaseClient';
 
-const muxWebhookSecret = process.env.MUX_WEBHOOK_SECRET!;
+export const config = { api: { bodyParser: false } };
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
-
-const readRawBody = async (req: NextApiRequest): Promise<Buffer> => {
-  const chunks: Uint8Array[] = [];
-  const readable = req.body as unknown as ReadableStream<Uint8Array> | null;
-  if (!readable) return Buffer.from([]);
-
-  for await (const chunk of readable as any) {
-    chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
-  }
-
-  return Buffer.concat(chunks);
-};
+const mux = new Mux({ webhookSecret: process.env.MUX_WEBHOOK_SECRET });
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const sig = req.headers['mux-signature'] as string;
-  const rawBody = await readRawBody(req);
-
-  let event;
+  const rawBody = await buffer(req); // get raw bytes
+  const bodyStr = rawBody.toString();
+  
   try {
-    event = Webhooks.verifyHeader(rawBody.toString(), sig, muxWebhookSecret);
-  } catch (err) {
-    console.error('Webhook verification failed:', err);
+    // throws if invalid
+    mux.webhooks.verifySignature(bodyStr, req.headers, process.env.MUX_WEBHOOK_SECRET!);
+  } catch (err: any) {
+    console.error('Invalid webhook signature:', err.message);
     return res.status(400).json({ error: 'Invalid signature' });
   }
 
+  const event = JSON.parse(bodyStr);
   if (event.type === 'video.asset.ready') {
-    const { id: assetId, playback_ids, passthrough } = event.data;
-
-    if (passthrough) {
+    const playbackId = event.data.playback_ids?.[0]?.id;
+    const assetId = event.data.id;
+    if (playbackId) {
       await supabase
         .from('stories')
-        .update({ muxPlaybackId: playback_ids?.[0]?.id })
-        .eq('id', passthrough);
+        .update({ mux_playback_id: playbackId })
+        .eq('mux_asset_id', assetId);
     }
   }
 
-  return res.status(200).json({ received: true });
+  res.status(200).json({ received: true });
+}
+
+async function buffer(req: NextApiRequest) {
+  const chunks: Buffer[] = [];
+  for await (const chunk of req as any) chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
+  return Buffer.concat(chunks);
 }
