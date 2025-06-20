@@ -19,6 +19,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.10",
     "@types/react": "^19.1.8",
+    "supabase": "^2.26.9",
     "typescript": "^5.8.3"
   }
 }
