@@ -1,8 +1,8 @@
+// pages/api/mux/webhook.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
-import Webhook from '@mux/mux-node';
-import { supabase } from '../../../lib/supabaseClient';
-
-const muxWebhookSecret = process.env.MUX_WEBHOOK_SECRET!;
+import { createClient } from '@supabase/supabase-js';
+import Mux from '@mux/mux-node';
+import { buffer } from 'micro';
 
 export const config = {
   api: {
@@ -10,49 +10,40 @@ export const config = {
   },
 };
 
-const buffer = async (readable: ReadableStream<Uint8Array> | null) => {
-  const chunks: Uint8Array[] = [];
-  if (!readable) return Buffer.from([]);
-  const reader = (readable as any)[Symbol.asyncIterator]();
-  for await (const chunk of reader) {
-    chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
-  }
-  return Buffer.concat(chunks);
-};
-
+const mux = new Mux();
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'POST') return res.status(405).end();
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method Not Allowed' });
+  }
 
-  const rawBody = await buffer(req.body);
   const sig = req.headers['mux-signature'] as string;
+  const muxWebhookSecret = process.env.MUX_WEBHOOK_SECRET!;
+  const rawBody = (await buffer(req)).toString();
 
   let event;
   try {
-    event = Webhook.verifyHeader(rawBody.toString(), sig, muxWebhookSecret);
+    event = mux.webhooks.verifyHeader(rawBody, sig, muxWebhookSecret);
   } catch (err) {
     console.error('Webhook verification failed:', err);
     return res.status(400).json({ error: 'Invalid signature' });
   }
 
   if (event.type === 'video.asset.ready') {
-    const assetId = event.data.id;
     const playbackId = event.data.playback_ids?.[0]?.id;
+    const uploadId = event.data.upload_id;
 
-    if (assetId && playbackId) {
-      const { error } = await supabase
+    if (playbackId && uploadId) {
+      await supabase
         .from('stories')
         .update({ muxPlaybackId: playbackId })
-        .eq('muxAssetId', assetId);
-
-      if (error) {
-        console.error('Failed to update story with playback ID:', error);
-        return res.status(500).json({ error: 'Database update failed' });
-      }
-
-      console.log(`Updated story with assetId ${assetId} → playbackId ${playbackId}`);
+        .eq('muxUploadId', uploadId);
     }
   }
 
-  res.status(200).json({ received: true });
+  return res.status(200).json({ received: true });
 }
