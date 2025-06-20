@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { Webhook, Video } from '@mux/mux-node';
-import { supabase } from '../lib/supabaseClient'; // ✅ works for sure
+import { supabase } from '../../../lib/supabaseClient'; // ✅ works for sure
 
 const muxWebhookSecret = process.env.MUX_WEBHOOK_SECRET!;
 

@@ -1,4 +1,4 @@
-import { supabase } from '../pages/api/lib/supabaseClient';
+import { supabase } from './supabaseClient';
 
 export async function syncUser(clerkUserId: string, email: string) {
   const { error } = await supabase
