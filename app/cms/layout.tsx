@@ -5,10 +5,7 @@ import { useEffect } from 'react';
 import { syncUser } from '@/lib/syncUserToSupabase';
 import './cms.css';
 
-export const metadata = {
-  title: 'KRTR CMS',
-  description: 'Content Management System for KRTR Local',
-};
+
 
 export default function CmsLayout({ children }: { children: React.ReactNode }) {
   const { user } = useUser();
