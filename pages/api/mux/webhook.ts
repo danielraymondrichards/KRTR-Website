@@ -1,58 +1,56 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import Webhook from '@mux/mux-node';
-import { supabase } from '../../../lib/supabaseClient'; // ✅ works for sure
+import { supabase } from '../../../lib/supabaseClient';
 
 const muxWebhookSecret = process.env.MUX_WEBHOOK_SECRET!;
 
-const mux = new Video({
-  tokenId: process.env.MUX_TOKEN_ID!,
-  tokenSecret: process.env.MUX_TOKEN_SECRET!,
-});
-
 export const config = {
   api: {
-    bodyParser: false, // Required for raw signature verification
+    bodyParser: false,
   },
+};
+
+const buffer = async (readable: ReadableStream<Uint8Array> | null) => {
+  const chunks = [];
+  if (!readable) return Buffer.from([]);
+  for await (const chunk of readable as any) {
+    chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
+  }
+  return Buffer.concat(chunks);
 };
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).end();
 
-  const rawBody = await getRawBody(req);
+  const rawBody = await buffer(req.body);
   const sig = req.headers['mux-signature'] as string;
 
   let event;
   try {
-    event = Webhook.verify(rawBody.toString(), sig, muxWebhookSecret);
+    event = Webhook.verifyHeader(rawBody.toString(), sig, muxWebhookSecret);
   } catch (err) {
     console.error('Webhook verification failed:', err);
-    return res.status(400).end();
+    return res.status(400).json({ error: 'Invalid signature' });
   }
 
   if (event.type === 'video.asset.ready') {
     const assetId = event.data.id;
     const playbackId = event.data.playback_ids?.[0]?.id;
 
-    if (!playbackId) return res.status(400).end();
+    if (assetId && playbackId) {
+      const { error } = await supabase
+        .from('stories')
+        .update({ muxPlaybackId: playbackId })
+        .eq('muxAssetId', assetId);
 
-    // Update story where video_url was temporarily set to asset id or url
-    const { error } = await supabase
-      .from('stories')
-      .update({ video_url: `https://stream.mux.com/${playbackId}.m3u8` })
-      .eq('video_url', assetId);
+      if (error) {
+        console.error('Failed to update story with playback ID:', error);
+        return res.status(500).json({ error: 'Database update failed' });
+      }
 
-    if (error) {
-      console.error('Failed to update story with playback ID:', error);
-      return res.status(500).end();
+      console.log(`Updated story with assetId ${assetId} → playbackId ${playbackId}`);
     }
   }
 
-  return res.status(200).end();
-}
-
-// Helper to get raw body
-async function getRawBody(req: NextApiRequest) {
-  const chunks: Uint8Array[] = [];
-  for await (const chunk of req) chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
-  return Buffer.concat(chunks);
+  res.status(200).json({ received: true });
 }
