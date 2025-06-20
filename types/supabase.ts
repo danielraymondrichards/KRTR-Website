@@ -68,7 +68,7 @@ export type Database = {
           created_at: string | null
           id: string
           image_url: string | null
-          mux_playback_id: string
+          mux_playback_id: string  | null
           tease: string | null
           text: string | null
           title: string | null
@@ -78,7 +78,7 @@ export type Database = {
           created_at?: string | null
           id: string
           image_url?: string | null
-          mux_playback_id: string
+          mux_playback_id: string | null
           tease?: string | null
           text?: string | null
           title?: string | null
@@ -88,7 +88,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           image_url?: string | null
-          mux_playback_id?: string
+          mux_playback_id?: string | null
           tease?: string | null
           text?: string | null
           title?: string | null
