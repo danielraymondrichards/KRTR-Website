@@ -26,14 +26,15 @@ export async function POST(req: NextRequest) {
   const { id, first_name, last_name, email_addresses } = clerkUser;
   const email = email_addresses?.[0]?.email_address || '';
 
-  const payload: Database['public']['Tables']['users']['Insert'] = {
-    clerk_id: id,
-    first_name,
-    last_name,
-    email,
-    role: 'viewer',       // default role
-    is_admin: false       // default to non-admin
-  };
+  const payload = {
+  clerk_id: id,
+  first_name,
+  last_name,
+  email,
+  role: 'viewer',
+  is_admin: false,
+} satisfies Database['public']['Tables']['users']['Insert'];
+
 
   const { error } = await supabase
     .from('users')
