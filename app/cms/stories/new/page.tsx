@@ -105,26 +105,35 @@ export default function NewStoryPage() {
     });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
 
-    const imageUrl = await uploadImageToCloudinary();
-    const muxPlaybackId = await uploadVideoToMux();
+  const imageUrl = await uploadImageToCloudinary();
+  const muxPlaybackId = await uploadVideoToMux();
 
-    await supabase.from('stories').insert({
-      id: storyId,
-      author,
-      title,
-      tease,
-      text,
-      image_url: imageUrl,
-      mux_playback_id: muxPlaybackId,
-    });
+  const { error, status } = await supabase.from('stories').insert({
+    id: storyId,
+    author,
+    title,
+    tease,
+    text,
+    image_url: imageUrl || '',
+    mux_playback_id: muxPlaybackId || '',
+  });
 
-    setLoading(false);
+  if (error) {
+    console.error('Supabase insert error:', error.message);
+  } else {
+    console.log('Story inserted successfully!', status);
     router.push('/cms/stories');
-  };
+  }
+
+  setLoading(false);
+};
+
+
+  
 
   return (
     <main className="p-6 max-w-3xl mx-auto">
