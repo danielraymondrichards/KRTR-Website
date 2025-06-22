@@ -1,6 +1,7 @@
 import { getAuth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
+import type { Database } from '@/types/supabase';
 
 export async function POST(req: NextRequest) {
   const { userId } = getAuth(req);
@@ -17,12 +18,18 @@ export async function POST(req: NextRequest) {
   const clerkUser = await res.json();
   const { id, first_name, last_name, email_addresses } = clerkUser;
 
-  const { error } = await supabase.from('users').upsert({
-    clerk_id: id,
-    first_name,
-    last_name,
-    email: email_addresses?.[0]?.email_address || '',
-  }, { onConflict: 'clerk_id' });
+  const payload: Database['public']['Tables']['users']['Insert'] = {
+  clerk_id: id,
+  first_name,
+  last_name,
+  email,
+  role: 'viewer',       // 👈 required by your Insert type
+  is_admin: false       // 👈 also required unless your DB sets a default
+};
+
+const { error } = await supabase
+  .from('users')
+  .upsert(payload, { onConflict: 'clerk_id' });
 
   if (error) {
     console.error('Supabase sync error:', error);
