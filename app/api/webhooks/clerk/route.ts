@@ -30,20 +30,21 @@ export async function POST(req: NextRequest) {
 
   const clerkUser = (await res.json()) as ClerkUser;
 
-const payload: Database['public']['Tables']['users']['Insert'][] = [
-  {
-    clerk_id: clerkUser.id,
-    first_name: clerkUser.first_name,
-    last_name: clerkUser.last_name,
-    email: clerkUser.email_addresses?.[0]?.email_address || '',
-    role: 'viewer',
-    is_admin: false,
-  }
-];
+  const payload: Database['public']['Tables']['users']['Insert'][] = [
+    {
+      clerk_id: clerkUser.id, // required or optional, fine to include
+      first_name: clerkUser.first_name,
+      last_name: clerkUser.last_name,
+      email: clerkUser.email_addresses?.[0]?.email_address || null, // ← match nullable type
+      role: 'viewer',
+      is_admin: false,
+      created_at: null, // ← optional but included to satisfy TS insert type
+    }
+  ];
 
-const { error } = await supabase
-  .from('users')
-  .upsert(payload, { onConflict: 'clerk_id' });
+  const { error } = await supabase
+    .from('users')
+    .upsert(payload, { onConflict: 'clerk_id' });
 
   if (error) {
     console.error('Supabase sync error:', error);
