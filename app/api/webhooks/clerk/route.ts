@@ -1,14 +1,13 @@
-import { auth } from '@clerk/nextjs';
+import { getAuth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
 
-export async function POST() {
-  const { userId } = auth();
+export async function POST(req: Request) {
+  const { userId } = getAuth(req);
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const supabase = createClient();
 
-  // Get Clerk user info
   const res = await fetch(`https://api.clerk.com/v1/users/${userId}`, {
     headers: {
       Authorization: `Bearer ${process.env.CLERK_SECRET_KEY!}`,
@@ -16,7 +15,6 @@ export async function POST() {
   });
 
   const clerkUser = await res.json();
-
   const { id, first_name, last_name, email_addresses } = clerkUser;
 
   const { error } = await supabase.from('users').upsert({
@@ -27,9 +25,9 @@ export async function POST() {
   }, { onConflict: 'clerk_id' });
 
   if (error) {
-    console.error('Sync error:', error);
+    console.error('Supabase sync error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ success: true });
+  return NextResponse.json({ status: 'success' });
 }
