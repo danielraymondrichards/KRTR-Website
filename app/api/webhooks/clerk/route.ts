@@ -5,31 +5,39 @@ import type { Database } from '@/types/supabase';
 
 export async function POST(req: NextRequest) {
   const { userId } = getAuth(req);
-  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!userId) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
   const supabase = createClient();
 
+  // Fetch Clerk user info using backend key
   const res = await fetch(`https://api.clerk.com/v1/users/${userId}`, {
     headers: {
       Authorization: `Bearer ${process.env.CLERK_SECRET_KEY!}`,
     },
   });
 
+  if (!res.ok) {
+    return NextResponse.json({ error: 'Failed to fetch Clerk user' }, { status: 500 });
+  }
+
   const clerkUser = await res.json();
   const { id, first_name, last_name, email_addresses } = clerkUser;
+  const email = email_addresses?.[0]?.email_address || '';
 
   const payload: Database['public']['Tables']['users']['Insert'] = {
-  clerk_id: id,
-  first_name,
-  last_name,
-  email,
-  role: 'viewer',       // 👈 required by your Insert type
-  is_admin: false       // 👈 also required unless your DB sets a default
-};
+    clerk_id: id,
+    first_name,
+    last_name,
+    email,
+    role: 'viewer',       // default role
+    is_admin: false       // default to non-admin
+  };
 
-const { error } = await supabase
-  .from('users')
-  .upsert(payload, { onConflict: 'clerk_id' });
+  const { error } = await supabase
+    .from('users')
+    .upsert(payload, { onConflict: 'clerk_id' });
 
   if (error) {
     console.error('Supabase sync error:', error);
