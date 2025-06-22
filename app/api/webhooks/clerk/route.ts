@@ -37,7 +37,8 @@ export async function POST(req: NextRequest) {
 
   const { error } = await supabase
     .from('users')
-    .upsert(payload, { onConflict: 'clerk_id' });
+    .upsert([payload], { onConflict: 'clerk_id' });
+
 
   if (error) {
     console.error('Supabase sync error:', error);
