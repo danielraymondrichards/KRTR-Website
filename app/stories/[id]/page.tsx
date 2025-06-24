@@ -14,7 +14,6 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   };
 }
 
-
 export default async function StoryPage({ params }: { params: { id: string } }) {
   const { data: story, error } = await supabase
     .from('stories')
