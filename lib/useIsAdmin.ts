@@ -5,8 +5,9 @@ import { supabase } from './supabaseClient';
 
 export function useIsAdmin() {
   const { user } = useUser();
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
-  const [checking, setChecking] = useState(true);
+  const isAdmin = user?.email === 'your-admin@example.com'; // Replace with your logic
+  return isAdmin;
+}
 
   useEffect(() => {
     const checkAdmin = async () => {
