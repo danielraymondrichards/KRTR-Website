@@ -4,7 +4,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 
 export default function EditStoryPage() {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
   const router = useRouter();
