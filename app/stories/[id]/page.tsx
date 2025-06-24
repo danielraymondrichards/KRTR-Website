@@ -1,9 +1,7 @@
 import { supabase } from '@/lib/supabaseClient';
 import { notFound } from 'next/navigation';
-import { type Metadata, type ResolvingMetadata } from 'next';
-export default async function StoryPage({ params }: { params: { id: string } }) {
 
-export default async function StoryPage({ params }: PageProps<{ id: string }>) {
+export default async function StoryPage({ params }: { params: { id: string } }) {
   const { data: story, error } = await supabase
     .from('stories')
     .select('*')
