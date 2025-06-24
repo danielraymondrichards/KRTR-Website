@@ -1,14 +1,18 @@
-import { createServerClient } from '@supabase/ssr';
+import { createPagesServerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
-import { Database } from '@/types/supabase';
 
-export const createClient = () =>
-  createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, // or SERVICE_ROLE_KEY if you're doing upserts
+export const createSupabaseServerClient = () => {
+  const cookieStore = cookies();
+
+  return createPagesServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL as string,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string,
     {
-      cookies,
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value;
+        },
+      },
     }
   );
-
-  //changing so it will push//
+};
