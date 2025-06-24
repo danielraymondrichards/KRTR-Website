@@ -1,10 +1,14 @@
-import { authMiddleware } from '@supabase/auth-helpers-nextjs';
+import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+
+export async function middleware(req: NextRequest) {
+  const res = NextResponse.next();
+  const supabase = createMiddlewareClient({ req, res });
+  await supabase.auth.getSession();
+  return res;
+}
 
 export const config = {
-  matcher: ['/cms/:path*'], // protects all /cms routes
+  matcher: ['/cms/:path*'], // restrict middleware to your CMS routes
 };
-
-export default authMiddleware({
-  redirectTo: '/cms/sign-in', // redirect unauthenticated users
-});
-
