@@ -1,6 +1,6 @@
 // lib/useIsAdmin.ts
 import { useEffect, useState } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useUser } from '@supabase/auth-helpers-react';
 import { supabase } from './supabaseClient';
 
 export function useIsAdmin() {
