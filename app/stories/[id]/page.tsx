@@ -1,5 +1,19 @@
 import { supabase } from '@/lib/supabaseClient';
 import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
+
+export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+  const { data: story } = await supabase
+    .from('stories')
+    .select('title')
+    .eq('id', params.id)
+    .single();
+
+  return {
+    title: story?.title ? `KRTR Local – ${story.title}` : 'KRTR Local',
+  };
+}
+
 
 export default async function StoryPage({ params }: { params: { id: string } }) {
   const { data: story, error } = await supabase
