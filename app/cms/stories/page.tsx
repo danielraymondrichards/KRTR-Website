@@ -1,7 +1,6 @@
 'use client';
-
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 
 type Story = {
@@ -10,41 +9,26 @@ type Story = {
   author: string;
 };
 
-export default function StoryList() {
+export default function StoriesPage() {
   const [stories, setStories] = useState<Story[]>([]);
 
   useEffect(() => {
-    const loadStories = async () => {
-      const { data, error } = await supabase
-        .from('stories')
-        .select('id, title, author')
-        .order('created_at', { ascending: false });
-
-      if (!error && data) setStories(data);
-    };
-
-    loadStories();
+    supabase.from('stories').select('id, title, author').then(({ data }) => {
+      if (data) setStories(data);
+    });
   }, []);
 
   return (
-    <div>
-      <h1 className="cms-title">Story Builder</h1>
-
-      <div className="my-4">
-        <Link href="/cms/stories/new" className="bg-green-600 text-white px-4 py-2 rounded">
-          + Add New Story
-        </Link>
-      </div>
-
-      <ul className="divide-y border rounded">
-        {stories.map((story) => (
-          <li key={story.id} className="p-4 flex justify-between items-center">
-            <div>
-              <div className="font-semibold">{story.title}</div>
-              <div className="text-sm text-gray-600">By {story.author}</div>
-            </div>
-            <Link href={`/cms/stories/edit`} className="text-blue-600 hover:underline">
-              Edit
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4">Stories</h1>
+      <Link href="/stories/new" className="bg-green-600 text-white px-4 py-2 rounded mb-4 inline-block">
+        + Add New Story
+      </Link>
+      <ul className="divide-y">
+        {stories.map((s) => (
+          <li key={s.id} className="p-2">
+            <Link href={`/stories/edit/${s.id}`} className="text-blue-600 hover:underline">
+              {s.title} — {s.author}
             </Link>
           </li>
         ))}
