@@ -10,8 +10,9 @@ const mux = new Mux({
 export async function POST(req: NextRequest) {
   const upload = await mux.video.uploads.create({
     new_asset_settings: {
-      playback_policy: ['public'],
+      playback_policy: ['public'] as ['public'],
     },
+    cors_origin: '*',
   });
 
   return NextResponse.json({
