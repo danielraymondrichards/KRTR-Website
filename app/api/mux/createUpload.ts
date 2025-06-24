@@ -12,7 +12,6 @@ export async function POST(req: NextRequest) {
     new_asset_settings: {
       playback_policy: ['public'],
     },
-    playback_policy: ['public'],
   });
 
   return NextResponse.json({
