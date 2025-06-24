@@ -1,4 +1,17 @@
-export default function HomePage() {
+import { supabase } from '@/lib/supabaseClient';
+import Link from 'next/link';
+
+
+export default async function HomePage() {
+const { data: stories, error } = await supabase
+  .from('stories')
+  .select('id, title, tease, mux_thumbnail_url')
+  .eq('is_published', true)
+  .order('created_at', { ascending: false });
+
+if (error) {
+  console.error(error);
+}
   return (
     <div>
       {/* Header */}
@@ -28,9 +41,17 @@ export default function HomePage() {
 
         <aside className="min-h-[250px] bg-gray-300 p-4">LS Sidebar</aside>
 
-        <section className="col-span-2 bg-white p-4 shadow">Story Item 1</section>
-        <section className="col-span-2 bg-white p-4 shadow">Story Item 2</section>
-        <section className="col-span-2 bg-white p-4 shadow">Story Item 3</section>
+        {stories?.slice(0, 10).map((story) => (
+  <section key={story.id} className="col-span-2 bg-white p-4 shadow hover:shadow-md transition">
+    <Link href={`/stories/${story.id}`}>
+      {story.mux_thumbnail_url && (
+        <img src={story.mux_thumbnail_url} alt={story.title} className="w-full h-40 object-cover rounded mb-2" />
+      )}
+      <h2 className="text-xl font-semibold">{story.title}</h2>
+      <p className="text-gray-600">{story.tease}</p>
+    </Link>
+  </section>
+))}
       </main>
 
       {/* Footer */}
