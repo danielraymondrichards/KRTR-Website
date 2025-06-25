@@ -21,6 +21,8 @@ export default async function HomePage() {
     .limit(1)
     .single();
 
+  console.log('Assignment:', assignment);
+
   const assignedIds = [
     assignment?.hero_story_id,
     assignment?.top_story_1,
@@ -29,23 +31,24 @@ export default async function HomePage() {
     assignment?.top_story_4,
   ].filter(Boolean);
 
+  console.log('Assigned IDs:', assignedIds);
 
-const today = startOfToday().toISOString();
+  const today = startOfToday().toISOString();
 
-const { data: hsAds } = await supabase
-  .from('ads')
-  .select('*')
-  .eq('type', 'hsbanner')
-  .lte('start_date', today)
-  .gte('end_date', today);
+  const { data: hsAds } = await supabase
+    .from('ads')
+    .select('*')
+    .eq('type', 'hsbanner')
+    .lte('start_date', today)
+    .gte('end_date', today);
 
   const { data: tsAds } = await supabase
-  .from('ads')
-  .select('*')
-  .eq('type', 'tsbanner')
-  .lte('start_date', today)
-  .gte('end_date', today);
-  
+    .from('ads')
+    .select('*')
+    .eq('type', 'tsbanner')
+    .lte('start_date', today)
+    .gte('end_date', today);
+
   const allsiteAd = await fetchAllsiteAd();
 
   const { data: featuredStories } = await supabase
@@ -53,14 +56,21 @@ const { data: hsAds } = await supabase
     .select('id, title, tease, mux_thumbnail_url')
     .in('id', assignedIds);
 
-  const heroStory = featuredStories?.find(s => s.id === assignment?.hero_story_id) || null;
+  console.log('Featured Stories:', featuredStories);
+  console.log('Trying to match hero_story_id:', assignment?.hero_story_id);
+
+  const heroStory =
+    featuredStories?.find((s) => String(s.id) === String(assignment?.hero_story_id)) || null;
+
+  console.log('Resolved Hero Story:', heroStory);
+
   const topStories = [
     assignment?.top_story_1,
     assignment?.top_story_2,
     assignment?.top_story_3,
     assignment?.top_story_4,
   ]
-    .map(id => featuredStories?.find(s => s.id === id))
+    .map((id) => featuredStories?.find((s) => String(s.id) === String(id)))
     .filter(Boolean) as Story[];
 
   const { data: stories, error } = await supabase
@@ -75,10 +85,8 @@ const { data: hsAds } = await supabase
 
   return (
     <div>
-      {/* Header / Navbar */}
       {allsiteAd && (
         <div className="w-full bg-white shadow">
-          {/* You can adjust this to render image, HTML, etc. */}
           <img src={allsiteAd.image_url} alt="Sitewide Ad" className="w-full h-auto" />
         </div>
       )}
@@ -90,10 +98,7 @@ const { data: hsAds } = await supabase
         </div>
       </header>
 
-      {/* Main Grid Layout */}
       <main className="grid grid-cols-1 md:grid-cols-3 gap-4 px-4 md:px-[100px] py-6 auto-rows-min">
-
-        {/* HERO STORY */}
         <section className="md:col-span-3 bg-gray-200 rounded-lg overflow-hidden">
           {heroStory ? (
             <Link href={`/stories/${heroStory.id}`}>
@@ -108,14 +113,12 @@ const { data: hsAds } = await supabase
           )}
         </section>
 
-        {/* HS Banner Ad */}
-        <section className="md:col-span-3 bg-yellow-300 rounded-lg">{hsAds && hsAds.length > 0 && <RotatingBanner ads={hsAds} />}
-</section>
+        <section className="md:col-span-3 bg-yellow-300 rounded-lg">
+          {hsAds && hsAds.length > 0 && <RotatingBanner ads={hsAds} />}
+        </section>
 
-        {/* WEATHER BAR */}
         <section className="md:col-span-3 bg-blue-200 rounded-lg">Weather Bar</section>
 
-        {/* Top Stories */}
         <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
           {topStories.length > 0 ? (
             topStories.map((story) => (
@@ -132,17 +135,14 @@ const { data: hsAds } = await supabase
           )}
         </div>
 
-        {/* TS Sidebar (Right Column, Tall) */}
         <aside className="md:row-span-2 bg-gray-100 p-4">TS Sidebar</aside>
 
-        {/* TS Banner Ad */}
-        <section className="md:col-span-3 bg-yellow-200">{tsAds && tsAds.length > 0 && <RotatingBanner ads={tsAds} />}
-</section>
+        <section className="md:col-span-3 bg-yellow-200">
+          {tsAds && tsAds.length > 0 && <RotatingBanner ads={tsAds} />}
+        </section>
 
-        {/* LS Sidebar (Bottom Right) */}
         <aside className="min-h-[250px] bg-gray-300 p-4">LS Sidebar</aside>
 
-        {/* Latest Stories from Supabase */}
         {stories?.slice(0, 10).map((story) => (
           <section key={story.id} className="md:col-span-2 bg-white p-4 shadow hover:shadow-md transition">
             <Link href={`/stories/${story.id}`}>
@@ -160,7 +160,6 @@ const { data: hsAds } = await supabase
         ))}
       </main>
 
-      {/* Footer */}
       <footer className="w-full bg-black text-white text-center py-4">[Footer Placeholder]</footer>
     </div>
   );
