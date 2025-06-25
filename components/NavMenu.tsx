@@ -16,18 +16,22 @@ export default function NavMenu() {
 
       {/* Mobile Toggle Button */}
       <button
-        className="md:hidden focus:outline-none"
-        onClick={() => setOpen(!open)}
-        aria-label="Toggle navigation"
+        onClick={() => setIsOpen(!isOpen)}
+        className="md:hidden p-2 focus:outline-none"
+        aria-label="Toggle menu"
       >
-        <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24">
-          {open ? (
-            <path d="M6 18L18 6M6 6l12 12" /> // X
-          ) : (
-            <path d="M4 6h16M4 12h16M4 18h16" /> // Hamburger
-          )}
+        <svg
+          className="w-6 h-6 text-white"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </button>
+
 
       {/* Mobile Nav Menu */}
       {open && (
