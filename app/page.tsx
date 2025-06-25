@@ -1,6 +1,10 @@
 import { supabase } from '@/lib/supabaseClient';
 import Link from 'next/link';
 import NavMenu from '@/components/NavMenu';
+import { fetchAllsiteAd } from '@/lib/fetchAllsiteAd';
+import { fetchRotatingAds } from '@/lib/fetchRotatingAds';
+import RotatingBanner from '@/components/RotatingBanner';
+import { startOfToday } from 'date-fns';
 
 type Story = {
   id: string;
@@ -24,6 +28,19 @@ export default async function HomePage() {
     assignment?.top_story_3,
     assignment?.top_story_4,
   ].filter(Boolean);
+
+const supabase = createClient();
+
+const today = startOfToday().toISOString();
+
+const { data: hsAds } = await supabase
+  .from('ads')
+  .select('*')
+  .eq('type', 'hsbanner')
+  .lte('start_date', today)
+  .gte('end_date', today);
+  
+  const allsiteAd = await fetchAllsiteAd();
 
   const { data: featuredStories } = await supabase
     .from('stories')
@@ -53,6 +70,13 @@ export default async function HomePage() {
   return (
     <div>
       {/* Header / Navbar */}
+      {allsiteAd && (
+        <div className="w-full bg-white shadow">
+          {/* You can adjust this to render image, HTML, etc. */}
+          <img src={allsiteAd.image_url} alt="Sitewide Ad" className="w-full h-auto" />
+        </div>
+      )}
+
       <header className="w-full py-4 border-b bg-[#226CE0] text-white">
         <div className="flex justify-between items-center px-4 md:px-[100px]">
           <div className="text-2xl font-bold">[Logo]</div>
@@ -79,7 +103,8 @@ export default async function HomePage() {
         </section>
 
         {/* HS Banner Ad */}
-        <section className="md:col-span-3 bg-yellow-300 rounded-lg">HS Banner Ad</section>
+        <section className="md:col-span-3 bg-yellow-300 rounded-lg">{hsAds && hsAds.length > 0 && <RotatingBanner ads={hsAds} />}
+</section>
 
         {/* WEATHER BAR */}
         <section className="md:col-span-3 bg-blue-200 rounded-lg">Weather Bar</section>
@@ -105,7 +130,8 @@ export default async function HomePage() {
         <aside className="md:row-span-2 bg-gray-100 p-4">TS Sidebar</aside>
 
         {/* TS Banner Ad */}
-        <section className="md:col-span-3 bg-yellow-200">TS Banner Ad</section>
+        <section className="md:col-span-3 bg-yellow-200">{tsAds && tsAds.length > 0 && <RotatingBanner ads={tsAds} />}
+</section>
 
         {/* LS Sidebar (Bottom Right) */}
         <aside className="min-h-[250px] bg-gray-300 p-4">LS Sidebar</aside>

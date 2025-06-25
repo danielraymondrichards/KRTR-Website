@@ -3,6 +3,10 @@ import { supabase } from '@/lib/supabaseClient';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import MuxPlayer from '@mux/mux-player-react/lazy';
+import { fetchAllsiteAd } from '@/lib/fetchAllsiteAd';
+import { fetchRotatingAds } from '@/lib/fetchRotatingAds';
+import RotatingBanner from '@/components/RotatingBanner';
+import { startOfToday } from 'date-fns';
 
 type Story = {
   id: string;
@@ -12,6 +16,20 @@ type Story = {
   pub_date: string;
   mux_playback_id: string;
 };
+
+const supabase = createClient();
+
+const today = startOfToday().toISOString();
+
+const { data: hsAds } = await supabase
+  .from('ads')
+  .select('*')
+  .eq('type', 'hsbanner')
+  .lte('start_date', today)
+  .gte('end_date', today);
+
+
+const allsiteAd = await fetchAllsiteAd();
 
 export default async function StoryPage({ params }: any) {
   const { short_id } = params;
@@ -30,6 +48,13 @@ export default async function StoryPage({ params }: any) {
   return (
     <div>
       {/* Header / Navbar */}
+      {allsiteAd && (
+        <div className="w-full bg-white shadow">
+          {/* You can adjust this to render image, HTML, etc. */}
+          <img src={allsiteAd.image_url} alt="Sitewide Ad" className="w-full h-auto" />
+        </div>
+      )}
+
       <header className="w-full py-4 border-b bg-[#226CE0] text-white">
         <div className="flex justify-between items-center px-4 md:px-[100px]">
           <div className="text-2xl font-bold">
