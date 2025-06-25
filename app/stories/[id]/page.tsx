@@ -2,7 +2,12 @@ import { supabase } from '@/lib/supabaseClient';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+// ✅ Use regular async function, NOT arrow function
+export async function generateMetadata(
+  context: { params: { id: string } }
+): Promise<Metadata> {
+  const { params } = context;
+
   const { data: story } = await supabase
     .from('stories')
     .select('title')
@@ -14,6 +19,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   };
 }
 
+// ✅ Also use plain inline typing for page props
 export default async function StoryPage({ params }: { params: { id: string } }) {
   const { data: story, error } = await supabase
     .from('stories')
