@@ -68,7 +68,7 @@ export default async function StoryPage({ params }: any) {
 
       {/* HS Banner Ad */}
       <section className="bg-yellow-300 px-4 md:px-[100px] py-2 text-center font-semibold text-lg">
-        HS Banner Ad
+        {hsAds && hsAds.length > 0 && <RotatingBanner ads={hsAds} />}
       </section>
 
       {/* Main Layout */}

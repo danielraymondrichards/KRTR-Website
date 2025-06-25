@@ -29,7 +29,6 @@ export default async function HomePage() {
     assignment?.top_story_4,
   ].filter(Boolean);
 
-const supabase = createClient();
 
 const today = startOfToday().toISOString();
 
