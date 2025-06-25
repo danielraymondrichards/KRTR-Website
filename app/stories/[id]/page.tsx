@@ -13,7 +13,7 @@ type Story = {
   mux_playback_id: string;
 };
 
-export default async function StoryPage({ params }: { params: Record<string, string> }) {
+export default async function StoryPage({ params }: any) {
   const { id } = params;
 
   const { data: story, error } = await supabase
