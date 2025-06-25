@@ -2,10 +2,9 @@ import { supabase } from '@/lib/supabaseClient';
 
 export default async function StoriesPage() {
   const { data: stories, error } = await supabase
-    .from('stories')
-    .select('*')
-    .eq('is_published', true)
-    .order('created_at', { ascending: false });
+  .from('stories')
+  .select('*')
+  .order('created_at', { ascending: false });
 
   if (error) return <div>Error loading stories</div>;
 
