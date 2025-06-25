@@ -2,7 +2,7 @@ import NavMenu from '@/components/NavMenu';
 import { supabase } from '@/lib/supabaseClient';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import '@mux/mux-player-react';
+import { MuxPlayer } from '@mux/mux-player-react/lazy';
 
 type Story = {
   id: string;
@@ -52,18 +52,20 @@ export default async function StoryPage({ params }: any) {
         {/* Story Content */}
         <article className="md:col-span-2 bg-white p-6 rounded shadow">
           <h1 className="text-3xl font-bold mb-2">{story.title}</h1>
-          <p className="text-sm text-gray-500 mb-4">{new Date(story.pub_date).toLocaleDateString()}</p>
+          <p className="text-sm text-gray-500 mb-4">
+            {new Date(story.pub_date).toLocaleDateString()}
+          </p>
           <p className="text-lg text-gray-700 mb-6">{story.tease}</p>
 
           {story.mux_playback_id && (
             <div className="mb-6">
-              <mux-player
-                playback-id={story.mux_playback_id}
-                stream-type="on-demand"
-                metadata-video-title={story.title}
-                primary-color="#226CE0"
+              <MuxPlayer
+                playbackId={story.mux_playback_id}
+                streamType="on-demand"
+                metadata={{ video_title: story.title }}
+                primaryColor="#226CE0"
                 style={{ width: '100%', aspectRatio: '16/9', borderRadius: '0.5rem' }}
-              ></mux-player>
+              />
             </div>
           )}
 
