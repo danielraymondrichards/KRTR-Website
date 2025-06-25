@@ -74,7 +74,6 @@ export default async function HomePage() {
   const { data: stories, error } = await supabase
     .from('stories')
     .select('id, title, tease, mux_thumbnail_url')
-    .eq('is_published', true)
     .order('created_at', { ascending: false });
 
   if (error) {
