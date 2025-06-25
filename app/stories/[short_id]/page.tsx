@@ -14,12 +14,12 @@ type Story = {
 };
 
 export default async function StoryPage({ params }: any) {
-  const { id } = params;
+  const { short_id } = params;
 
   const { data: story, error } = await supabase
     .from('stories')
     .select('id, title, tease, text, pub_date, mux_playback_id')
-    .eq('id', id)
+    .eq('short_id', short_id)
     .single();
 
   if (error || !story) {
