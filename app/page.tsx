@@ -49,10 +49,19 @@ export default async function HomePage() {
 
   const allsiteAd = await fetchAllsiteAd();
 
-  const { data: featuredStories } = await supabase
-    .from('stories')
-    .select('id, title, tease, mux_thumbnail_url')
-    .in('id', assignedIds);
+ const cleanIds = assignedIds.map((id) => String(id).trim());
+
+console.log('Cleaned assigned IDs:', cleanIds);
+
+const { data: featuredStories, error: storyError } = await supabase
+  .from('stories')
+  .select('id, title, tease, mux_thumbnail_url')
+  .in('id', cleanIds)
+  .eq('is_published', true);
+
+console.log('Featured Stories:', featuredStories);
+console.error('Story Fetch Error:', storyError);
+
 
   console.log('Featured Stories:', featuredStories);
   console.log('Trying to match hero_story_id:', assignment?.hero_story_id);
