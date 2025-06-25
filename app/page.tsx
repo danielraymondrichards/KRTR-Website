@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabaseClient';
 import Link from 'next/link';
+import NavMenu from '@/components/NavMenu';
 
 type Story = {
   id: string;
@@ -55,7 +56,7 @@ export default async function HomePage() {
       <header className="w-full py-4 border-b bg-[#226CE0] text-white">
         <div className="flex justify-between items-center px-4 md:px-[100px]">
           <div className="text-2xl font-bold">[Logo]</div>
-          <nav className="space-x-4">[Navigation]</nav>
+          <nav><NavMenu /></nav>
         </div>
       </header>
 
