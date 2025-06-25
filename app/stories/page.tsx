@@ -1,12 +1,14 @@
 import { supabase } from '@/lib/supabaseClient';
 
-export default async function StoriesPage() {
-  const { data: stories, error } = await supabase
+const { data: stories, error } = await supabase
   .from('stories')
   .select('*')
   .order('created_at', { ascending: false });
 
-  if (error) return <div>Error loading stories</div>;
+if (error) {
+  console.error('Supabase query failed:', error.message, error.details, error.hint);
+  return <div>Error loading stories: {error.message}</div>;
+}
 
   return (
     <div className="p-6 space-y-12">
