@@ -14,12 +14,10 @@ type Story = {
 };
 
 export default async function HomePage() {
-  const { data: assignment } = await supabase
-    .from('assignments')
-    .select('hero_story_id, top_story_1, top_story_2, top_story_3, top_story_4')
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .single();
+ const { data: assignment } = await supabase
+  .from('assignments')
+  .select('hero_story_id, top_story_1, top_story_2, top_story_3, top_story_4')
+  .maybeSingle();
 
   console.log('Assignment:', assignment);
 
