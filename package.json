@@ -12,6 +12,7 @@
     "@mux/mux-player": "^3.5.0",
     "@mux/mux-player-react": "^3.5.0",
     "@supabase/supabase-js": "^2.39.4",
+    "date-fns": "^4.1.0",
     "next": "15.3.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
