@@ -13,15 +13,13 @@ type Story = {
   mux_playback_id: string;
 };
 
-export default async function StoryPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default async function StoryPage({ params }: { params: Record<string, string> }) {
+  const { id } = params;
+
   const { data: story, error } = await supabase
     .from('stories')
     .select('id, title, tease, text, pub_date, mux_playback_id')
-    .eq('id', params.id)
+    .eq('id', id)
     .single();
 
   if (error || !story) {
@@ -57,7 +55,6 @@ export default async function StoryPage({
           <p className="text-sm text-gray-500 mb-4">{new Date(story.pub_date).toLocaleDateString()}</p>
           <p className="text-lg text-gray-700 mb-6">{story.tease}</p>
 
-          {/* Mux Video Player */}
           {story.mux_playback_id && (
             <div className="mb-6">
               <mux-player
