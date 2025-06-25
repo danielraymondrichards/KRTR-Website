@@ -2,7 +2,7 @@ import NavMenu from '@/components/NavMenu';
 import { supabase } from '@/lib/supabaseClient';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import '@mux/mux-player-react'; // Required for auto-registering <mux-player>
+import { MuxPlayer } from '@mux/mux-player-react';
 
 type Story = {
   id: string;
@@ -13,13 +13,11 @@ type Story = {
   mux_playback_id: string;
 };
 
-type Params = {
-  params: {
-    id: string;
-  };
-};
-
-export default async function StoryPage({ params }: Params) {
+export default async function StoryPage({
+  params,
+}: {
+  params: { id: string };
+}) {
   const { data: story, error } = await supabase
     .from('stories')
     .select('id, title, tease, text, pub_date, mux_playback_id')
@@ -71,8 +69,6 @@ export default async function StoryPage({ params }: Params) {
               />
             </div>
           )}
-
-
 
           <div className="prose max-w-none text-gray-800 whitespace-pre-wrap">
             {story.text}
