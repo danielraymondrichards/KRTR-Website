@@ -2,16 +2,15 @@ import { supabase } from '@/lib/supabaseClient';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 
-// ✅ Use regular async function, NOT arrow function
 export async function generateMetadata(
-  context: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<Metadata> {
-  const { params } = context;
+  const { id } = await params;
 
   const { data: story } = await supabase
     .from('stories')
     .select('title')
-    .eq('id', params.id)
+    .eq('id', id)
     .single();
 
   return {
@@ -19,12 +18,15 @@ export async function generateMetadata(
   };
 }
 
-// ✅ Also use plain inline typing for page props
-export default async function StoryPage({ params }: { params: { id: string } }) {
+export default async function StoryPage(
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+
   const { data: story, error } = await supabase
     .from('stories')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .single();
 
   if (error || !story) return notFound();
