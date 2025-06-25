@@ -16,7 +16,7 @@ export default function NavMenu() {
 
       {/* Mobile Toggle Button */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => setOpen(!open)}
         className="md:hidden p-2 focus:outline-none"
         aria-label="Toggle menu"
       >
