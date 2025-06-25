@@ -38,6 +38,13 @@ const { data: hsAds } = await supabase
   .eq('type', 'hsbanner')
   .lte('start_date', today)
   .gte('end_date', today);
+
+  const { data: tsAds } = await supabase
+  .from('ads')
+  .select('*')
+  .eq('type', 'tsbanner')
+  .lte('start_date', today)
+  .gte('end_date', today);
   
   const allsiteAd = await fetchAllsiteAd();
 
