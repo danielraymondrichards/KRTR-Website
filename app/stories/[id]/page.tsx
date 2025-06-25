@@ -2,7 +2,7 @@ import NavMenu from '@/components/NavMenu';
 import { supabase } from '@/lib/supabaseClient';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { MuxPlayer } from '@mux/mux-player-react/lazy';
+import MuxPlayer from '@mux/mux-player-react/lazy';
 
 type Story = {
   id: string;
