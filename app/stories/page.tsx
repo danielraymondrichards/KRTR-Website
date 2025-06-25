@@ -4,7 +4,7 @@ export default async function StoriesPage() {
   const { data: stories, error } = await supabase
   .from('stories')
   .select('*')
-  .order('created_at', { ascending: false });
+  .order('pub_date', { ascending: false });
 
   if (error) {
   console.error('Supabase query failed:', error.message, error.details, error.hint);
