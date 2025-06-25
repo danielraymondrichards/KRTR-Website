@@ -17,8 +17,6 @@ type Story = {
   mux_playback_id: string;
 };
 
-const supabase = createClient();
-
 const today = startOfToday().toISOString();
 
 const { data: hsAds } = await supabase
