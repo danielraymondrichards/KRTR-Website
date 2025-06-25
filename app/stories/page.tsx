@@ -18,17 +18,8 @@ export default async function StoriesPage() {
         <article key={story.id} className="border-b pb-8">
           <h2 className="text-2xl font-semibold mb-2">{story.title}</h2>
           <p className="text-sm text-gray-500 mb-4">By {story.author}</p>
-          {story.mux_playback_id && (
-            <div className="mb-4 aspect-video">
-              <iframe
-                src={`https://stream.mux.com/${story.mux_playback_id}.m3u8`}
-                allow="autoplay; fullscreen"
-                allowFullScreen
-                className="w-full h-full rounded"
-              />
-            </div>
-          )}
-          <div className="prose max-w-none">{story.text}</div>
+          <p className="text-sm text-gray-500 mb-4">Published {story.pub_date}</p>
+          <div className="prose max-w-none">{story.tease}</div>
         </article>
       ))}
     </div>
