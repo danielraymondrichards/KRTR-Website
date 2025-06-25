@@ -53,11 +53,14 @@ export default async function HomePage() {
 
 console.log('Cleaned assigned IDs:', cleanIds);
 
-const { data: featuredStories, error: storyError } = await supabase
-  .from('stories')
-  .select('id, title, tease, mux_thumbnail_url')
-  .in('id', cleanIds)
-  .eq('is_published', true);
+const { data: assignments, error: assignmentError } = await supabase
+  .from('assignments')
+  .select('hero_story_id, top_story_1, top_story_2, top_story_3, top_story_4')
+  .order('updated_at', { ascending: false })
+  .limit(1);
+
+console.log('Assignment:', assignment);
+
 
 console.log('Featured Stories:', featuredStories);
 console.error('Story Fetch Error:', storyError);
