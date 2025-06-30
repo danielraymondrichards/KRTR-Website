@@ -1,175 +1,98 @@
-import { supabase } from '@/lib/supabaseClient';
-import Link from 'next/link';
-import NavMenu from '@/components/NavMenu';
-import { fetchAllsiteAd } from '@/lib/fetchAllsiteAd';
-import { fetchRotatingAds } from '@/lib/fetchRotatingAds';
-import RotatingBanner from '@/components/RotatingBanner';
-import { startOfToday } from 'date-fns';
+// app/page.tsx
+import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
 
-type Story = {
+interface Story {
   id: string;
   title: string;
-  tease: string;
-  mux_thumbnail_url: string;
-};
+  body: string;
+  image_url: string;
+  is_published: boolean;
+}
 
-export default async function HomePage() {
- const { data: assignment } = await supabase
-  .from('assignments')
-  .select('hero_story_id, top_story_1, top_story_2, top_story_3, top_story_4')
-  .maybeSingle();
+const FALLBACK_STORY_ID = "44e97660-99ab-45f3-9b9d-2f09f5159313";
 
-  console.log('Assignment:', assignment);
+export default async function Page() {
+  const supabase = createServerComponentClient({ cookies });
 
-  const assignedIds = [
-    assignment?.hero_story_id,
-    assignment?.top_story_1,
-    assignment?.top_story_2,
-    assignment?.top_story_3,
-    assignment?.top_story_4,
+  const { data: assignments, error: assignError } = await supabase
+    .from("assignments")
+    .select("hero_story_id, top_story_1, top_story_2, top_story_3, top_story_4")
+    .single();
+
+  if (assignError || !assignments) {
+    return <div>Error loading story assignments.</div>;
+  }
+
+  const storyIds = [
+    assignments.hero_story_id,
+    assignments.top_story_1,
+    assignments.top_story_2,
+    assignments.top_story_3,
+    assignments.top_story_4,
+    FALLBACK_STORY_ID
   ].filter(Boolean);
 
-  console.log('Assigned IDs:', assignedIds);
+  const { data: stories, error: storyError } = await supabase
+    .from("stories")
+    .select("id, title, body, image_url, is_published")
+    .in("id", storyIds);
 
-  const today = startOfToday().toISOString();
+  if (storyError || !stories) {
+    return <div>Error loading stories.</div>;
+  }
 
-  const { data: hsAds } = await supabase
-    .from('ads')
-    .select('*')
-    .eq('type', 'hsbanner')
-    .lte('start_date', today)
-    .gte('end_date', today);
+  const publishedStories = stories.filter((s) => s.is_published);
+  const storyMap: Record<string, Story> = Object.fromEntries(
+    publishedStories.map((story) => [story.id, story])
+  );
 
-  const { data: tsAds } = await supabase
-    .from('ads')
-    .select('*')
-    .eq('type', 'tsbanner')
-    .lte('start_date', today)
-    .gte('end_date', today);
+  const getStory = (id: string | null): Story | null => {
+    if (id && storyMap[id]) return storyMap[id];
+    return storyMap[FALLBACK_STORY_ID] || null;
+  };
 
-  const allsiteAd = await fetchAllsiteAd();
-
- const cleanIds = assignedIds.map((id) => String(id).trim());
-
-console.log('Cleaned assigned IDs:', cleanIds);
-
-const { data: assignments, error: assignmentError } = await supabase
-  .from('assignments')
-  .select('hero_story_id, top_story_1, top_story_2, top_story_3, top_story_4')
-  .order('updated_at', { ascending: false })
-  .limit(1);
-
-console.log('Assignment:', assignment);
-
-
-console.log('Featured Stories:', featuredStories);
-console.error('Story Fetch Error:', storyError);
-
-
-  console.log('Featured Stories:', featuredStories);
-  console.log('Trying to match hero_story_id:', assignment?.hero_story_id);
-
-  const heroStory =
-    featuredStories?.find((s) => String(s.id) === String(assignment?.hero_story_id)) || null;
-
-  console.log('Resolved Hero Story:', heroStory);
-
+  const heroStory = getStory(assignments.hero_story_id);
   const topStories = [
-    assignment?.top_story_1,
-    assignment?.top_story_2,
-    assignment?.top_story_3,
-    assignment?.top_story_4,
-  ]
-    .map((id) => featuredStories?.find((s) => String(s.id) === String(id)))
-    .filter(Boolean) as Story[];
+    getStory(assignments.top_story_1),
+    getStory(assignments.top_story_2),
+    getStory(assignments.top_story_3),
+    getStory(assignments.top_story_4)
+  ].filter(Boolean);
 
-  const { data: stories, error } = await supabase
-    .from('stories')
-    .select('id, title, tease, mux_thumbnail_url')
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    console.error(error);
+  if (!heroStory && topStories.length === 0) {
+    return <div className="animate-pulse text-gray-500">Loading stories...</div>;
   }
 
   return (
-    <div>
-      {allsiteAd && (
-        <div className="w-full bg-white shadow">
-          <img src={allsiteAd.image_url} alt="Sitewide Ad" className="w-full h-auto" />
-        </div>
+    <div className="p-4 space-y-6">
+      {heroStory ? (
+        <section className="bg-gray-200 p-6 rounded">
+          <h2 className="text-2xl font-bold">Hero Story</h2>
+          <h3 className="text-xl">{heroStory.title}</h3>
+          <img src={heroStory.image_url} alt="Hero" className="w-full h-auto mt-2" />
+          <p>{heroStory.body}</p>
+        </section>
+      ) : (
+        <div className="h-48 bg-gray-100 animate-pulse rounded"></div>
       )}
 
-      <header className="w-full py-4 border-b bg-[#226CE0] text-white">
-        <div className="flex justify-between items-center px-4 md:px-[100px]">
-          <div className="text-2xl font-bold">[Logo]</div>
-          <nav><NavMenu /></nav>
-        </div>
-      </header>
-
-      <main className="grid grid-cols-1 md:grid-cols-3 gap-4 px-4 md:px-[100px] py-6 auto-rows-min">
-        <section className="md:col-span-3 bg-gray-200 rounded-lg overflow-hidden">
-          {heroStory ? (
-            <Link href={`/stories/${heroStory.id}`}>
-              <img src={heroStory.mux_thumbnail_url} alt={heroStory.title} className="w-full h-64 object-cover" />
-              <div className="p-4">
-                <h1 className="text-2xl font-bold">{heroStory.title}</h1>
-                <p className="text-gray-700">{heroStory.tease}</p>
-              </div>
-            </Link>
-          ) : (
-            <div className="p-4 text-center text-gray-600">No hero story assigned</div>
-          )}
-        </section>
-
-        <section className="md:col-span-3 bg-yellow-300 rounded-lg">
-          {hsAds && hsAds.length > 0 && <RotatingBanner ads={hsAds} />}
-        </section>
-
-        <section className="md:col-span-3 bg-blue-200 rounded-lg">Weather Bar</section>
-
-        <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <section>
+        <h2 className="text-xl font-bold">Top Stories</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {topStories.length > 0 ? (
             topStories.map((story) => (
-              <Link key={story.id} href={`/stories/${story.id}`} className="bg-white p-4 shadow hover:shadow-md transition block">
-                {story.mux_thumbnail_url && (
-                  <img src={story.mux_thumbnail_url} alt={story.title} className="w-full h-32 object-cover rounded mb-2" />
-                )}
-                <h2 className="text-xl font-semibold">{story.title}</h2>
-                <p className="text-gray-600">{story.tease}</p>
-              </Link>
+              <div key={story.id} className="border p-4 rounded">
+                <h4 className="font-semibold">{story.title}</h4>
+                <img src={story.image_url} alt="Top" className="w-full h-auto mt-1" />
+                <p className="text-sm mt-1">{story.body}</p>
+              </div>
             ))
           ) : (
-            <div className="col-span-2 text-center text-gray-600">No top stories assigned</div>
+            <div className="h-32 bg-gray-100 animate-pulse rounded col-span-full"></div>
           )}
         </div>
-
-        <aside className="md:row-span-2 bg-gray-100 p-4">TS Sidebar</aside>
-
-        <section className="md:col-span-3 bg-yellow-200">
-          {tsAds && tsAds.length > 0 && <RotatingBanner ads={tsAds} />}
-        </section>
-
-        <aside className="min-h-[250px] bg-gray-300 p-4">LS Sidebar</aside>
-
-        {stories?.slice(0, 10).map((story) => (
-          <section key={story.id} className="md:col-span-2 bg-white p-4 shadow hover:shadow-md transition">
-            <Link href={`/stories/${story.id}`}>
-              {story.mux_thumbnail_url && (
-                <img
-                  src={story.mux_thumbnail_url}
-                  alt={story.title}
-                  className="w-full h-40 object-cover rounded mb-2"
-                />
-              )}
-              <h2 className="text-xl font-semibold">{story.title}</h2>
-              <p className="text-gray-600">{story.tease}</p>
-            </Link>
-          </section>
-        ))}
-      </main>
-
-      <footer className="w-full bg-black text-white text-center py-4">[Footer Placeholder]</footer>
+      </section>
     </div>
   );
 }
